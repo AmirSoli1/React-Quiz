@@ -6,6 +6,8 @@ import Error from "./Error";
 import StartScreen from "./StartScreen";
 import Question from "./Question";
 import NextButton from "./NextButton";
+import Progress from "./Progress";
+import FinishScreen from "./FinishScreen";
 
 const initialState = {
   questions: [],
@@ -39,18 +41,22 @@ function reducer(state, action) {
         currentQuestion: state.currentQuestion + 1,
         answer: null,
       };
+    case "FINISH":
+      return { ...state, status: "finished" };
     default:
       throw new Error("Unhandled action type: " + action.type);
   }
 }
 
 export default function App() {
-  const [{ questions, status, currentQuestion, answer }, dispatch] = useReducer(
-    reducer,
-    initialState
-  );
+  const [{ questions, status, currentQuestion, answer, points }, dispatch] =
+    useReducer(reducer, initialState);
 
   const numQuestions = questions.length;
+  const maxPoints = questions.reduce(
+    (acc, question) => acc + question.points,
+    0
+  );
 
   useEffect(function () {
     async function fetchData() {
@@ -80,15 +86,30 @@ export default function App() {
         {status === "ready" && (
           <StartScreen numQuestions={numQuestions} dispatch={dispatch} />
         )}
+        {status === "finished" && (
+          <FinishScreen points={points} maxPoints={maxPoints} />
+        )}
         {status === "active" && (
           <>
+            <Progress
+              currentQuestion={currentQuestion}
+              numQuestions={numQuestions}
+              points={points}
+              maxPoints={maxPoints}
+              answer={answer}
+            />
             <Question
               question={questions[currentQuestion]}
               dispatch={dispatch}
               answer={answer}
             />
             {answer !== null && (
-              <NextButton dispatch={dispatch} answer={answer} />
+              <NextButton
+                dispatch={dispatch}
+                answer={answer}
+                currentQuestion={currentQuestion}
+                numQuestions={numQuestions}
+              />
             )}
           </>
         )}
