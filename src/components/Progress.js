@@ -8,7 +8,7 @@ function Progress({
   return (
     <header className="progress">
       <progress
-        max={numQuestions - 1}
+        max={numQuestions}
         value={currentQuestion + Number(answer !== null)}
       ></progress>
 
